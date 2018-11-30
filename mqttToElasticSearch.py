@@ -10,17 +10,21 @@
 #such as json is to be used
 
 
-mqttServer="192.168.1.10"
+mqttServer="localhost"
 mqttPort="1883"
+mqttLogin="mqtt"
+mqttPassword="password"
 
-channelSubs="$SYS/#"
+#channelSubs="$SYS/#"
+#channelSubs="temp_salon"
+
 #use below as alternative to subscribe to all channels
-#channelSubs="#"
+channelSubs="#"
 
+import time
 import paho.mqtt.client as mqtt
 from datetime import datetime
 from elasticsearch import Elasticsearch
-
 
 # The callback for when the client receives a CONNACK response from the server.
 def on_connect(client, userdata, flags, rc):
@@ -32,7 +36,7 @@ def on_connect(client, userdata, flags, rc):
 # The callback for when a PUBLISH message is received from the server.
 def on_message(client, userdata, msg):
     print(msg.topic+" "+str(msg.payload))
- 
+
 # this is the syntax to follow for the elasticSearch update taken from documentation
 #    es.index(index="my-index", doc_type="test-type", id=42, body={"any": +str(msg.payload, "timestamp": datetime.now()})
 #    {u'_id': u'42', u'_index': u'my-index', u'_type': u'test-type', u'_version': 1, u'ok': True}
@@ -40,28 +44,27 @@ def on_message(client, userdata, msg):
 #our implementation uses this to separate numeric(float) from string data
 
     try:
-	float(msg.payload)
-	es.index(index="my-index", doc_type="numeric", body={"topic" : msg.topic, "dataFloat" : float(msg.payload), "timestamp": datetime.utcnow()})
-    	
+        float(msg.payload)
+        es.index(index="my-index", doc_type="numeric", body={"topic" : msg.topic, "dataFloat" : float(msg.payload), "timestamp": datetime.utcnow()})
+
     except:
-	es.index(index="my-index", doc_type="string", body={"topic" : msg.topic, "dataString" : msg.payload, "timestamp": datetime.utcnow()})
-    
+        es.index(index="my-index", doc_type="string", body={"topic" : msg.topic, "dataString" : msg.payload, "timestamp": datetime.utcnow()})
+
 # by default we connect to elasticSearch on localhost:9200
 es = Elasticsearch()
 
 client = mqtt.Client()
 client.on_connect = on_connect
 client.on_message = on_message
+client.username_pw_set(mqttLogin, mqttPassword)
 client.connect(mqttServer,mqttPort, 60)
 
 # Blocking call that processes network traffic, dispatches callbacks and
 # handles reconnecting.
 # Other loop*() functions are available that give a threaded interface and a
 # manual interface.
-client.loop_forever()
+#client.loop_forever()
 
-
-
-
-
-
+client.loop_start()
+time.sleep(20)
+client.loop_stop(force=False)
