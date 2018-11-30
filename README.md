@@ -34,7 +34,7 @@ Modify if required the topics (default $SYS topic)
 channelSubs="#"
 ```
 
-# use
+# Use
 
 Run as python mqtt-elasticSearch from terminal on the same machine where elasticSearch is running
 
