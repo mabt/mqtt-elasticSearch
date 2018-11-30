@@ -1,4 +1,4 @@
-# mqtt-elasticSearch
+# mqtt-elasticsearch
 
 This file stores data published on MQTT in elasticSearch
 
