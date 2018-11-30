@@ -2,7 +2,7 @@
 
 This file stores data published on MQTT in elasticSearch
 
-# Dependencie
+# Dependencies
 
 Paho MQTT Python client library
 
